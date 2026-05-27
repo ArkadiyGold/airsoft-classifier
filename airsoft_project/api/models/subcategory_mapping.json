@@ -1,0 +1,28 @@
+{
+  "idx_to_subcategory": {
+    "0": "M serias",
+    "1": "ak",
+    "2": "rifle",
+    "3": "HK",
+    "4": "pouch",
+    "5": "vest",
+    "6": "backpack",
+    "7": "shutgun",
+    "8": "helmet",
+    "9": "mashinegun",
+    "10": "pistol"
+  },
+  "subcategories": [
+    "M serias",
+    "ak",
+    "rifle",
+    "HK",
+    "pouch",
+    "vest",
+    "backpack",
+    "shutgun",
+    "helmet",
+    "mashinegun",
+    "pistol"
+  ]
+}

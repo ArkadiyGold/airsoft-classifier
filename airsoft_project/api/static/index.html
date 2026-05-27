@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Airsoft Classifier</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 120px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .photo-upload {
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .photo-upload:hover {
+            background: #eef1ff;
+            border-color: #764ba2;
+        }
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .upload-text {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .upload-hint {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .photo-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .photo-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255,0,0,0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+        .results { display: none; }
+        .results.show { display: block; }
+        .prediction-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .prediction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .category {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .confidence {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .prediction-details {
+            color: #666;
+            font-size: 0.95em;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-right: 8px;
+            margin-top: 8px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        .loading.show { display: block; }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        .error.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Airsoft Classifier</h1>
+            <p>Классификация страйкбольного снаряжения с помощью ML</p>
+        </div>
+        
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">📝 Анализ объявления</h2>
+            
+            <div class="form-group">
+                <label for="post_id">ID поста (необязательно):</label>
+                <input 
+                    type="text" 
+                    id="post_id" 
+                    placeholder="354"
+                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;"
+                >
+                <small style="color: #999;">Если оставить пустым, будет сгенерирован автоматически</small>
+            </div>
+    
+            <div class="form-group">
+                <label for="text">Текст объявления:</label>
+                <textarea 
+                    id="text" 
+                    placeholder="Продаю новую страйкбольную винтовку..."
+                    style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; min-height: 120px;"
+                >Шлем оп скор , ковер и 2 пары очков</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Фотографии (необязательно):</label>
+                <label class="photo-upload" for="photo-input">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Нажмите для загрузки фото</div>
+                    <div class="upload-hint">или перетащите файлы сюда</div>
+                    <input type="file" id="photo-input" multiple accept="image/*">
+                </label>
+                <div class="photo-preview" id="photo-preview"></div>
+            </div>
+            
+            <button class="btn" onclick="analyze()">🔍 Классифицировать</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Анализируем текст и фото...</p>
+            </div>
+            
+            <div class="error" id="error"></div>
+        </div>
+        
+        <div class="card results" id="results">
+            <h2 style="margin-bottom: 20px;">📊 Результаты</h2>
+            <div id="predictions"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin;
+        let authToken = '';
+        let uploadedPhotos = [];
+
+        async function getToken() {
+            try {
+                const response = await fetch(`${API_URL}/auth/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: 'demo' })
+                });
+                const data = await response.json();
+                authToken = data.access_token;
+            } catch (error) {
+                console.error('Ошибка токена:', error);
+            }
+        }
+
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            const preview = document.getElementById('photo-preview');
+            
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhotos.push({
+                        photo_id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                        dataUrl: e.target.result,
+                        file: file
+                    });
+                    
+                    const div = document.createElement('div');
+                    div.className = 'photo-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview">
+                        <button class="photo-remove" onclick="removePhoto('${uploadedPhotos.length - 1}')">×</button>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function removePhoto(index) {
+            uploadedPhotos.splice(index, 1);
+            const preview = document.getElementById('photo-preview');
+            preview.innerHTML = '';
+            uploadedPhotos.forEach((photo, i) => {
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                div.innerHTML = `
+                    <img src="${photo.dataUrl}" alt="Preview">
+                    <button class="photo-remove" onclick="removePhoto(${i})">×</button>
+                `;
+                preview.appendChild(div);
+            });
+        }
+
+        async function analyze() {
+            const postIdInput = document.getElementById('post_id');
+            const textInput = document.getElementById('text');
+            
+            if (!textInput) {
+                console.error('❌ Не найден элемент textarea с id="text"!');
+                alert('Ошибка интерфейса: проверьте консоль браузера (F12)');
+                return;
+            }
+
+            const postId = (postIdInput?.value || '').trim() || 'web_demo_' + Date.now();
+            const text = textInput.value.trim();
+
+            console.log('📤 Отправляю на сервер:', { post_id: postId, text_length: text.length, text_preview: text.substring(0, 50) });
+
+            if (!text) {
+                alert('⚠️ Введите текст объявления!');
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            const error = document.getElementById('error');
+            
+            loading.classList.add('show');
+            results.classList.remove('show');
+            error.classList.remove('show');
+            error.textContent = '';
+            
+            try {
+                if (!authToken) await getToken();
+                
+                const response = await fetch(`${API_URL}/api/v1/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        post_id: postId,
+                        text: text,
+                        photos: uploadedPhotos.map((p, i) => ({ photo_id: p.photo_id, url: p.dataUrl }))
+                    })
+                });
+                
+                if (response.status === 403) {
+                    authToken = '';
+                    await getToken();
+                    return analyze();
+                }
+                if (!response.ok) throw new Error('Ошибка сервера: ' + response.status);
+                
+                const data = await response.json();
+                console.log('✅ Получено от сервера:', data);
+                displayResults(data);
+                
+            } catch (err) {
+                error.textContent = 'Ошибка: ' + err.message;
+                error.classList.add('show');
+                console.error('❌ Ошибка запроса:', err);
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        function displayResults(data) {
+            const container = document.getElementById('predictions');
+            container.innerHTML = '';
+            
+            if (!data.predictions || data.predictions.length === 0) {
+                container.innerHTML = '<p style="color:#666;text-align:center;padding:20px">Ничего не найдено в тексте</p>';
+                document.getElementById('results').classList.add('show');
+                return;
+            }
+
+            data.predictions.forEach((pred, index) => {
+                const item = document.createElement('div');
+                item.className = 'prediction-item';
+                
+                const confidencePercent = Math.round((pred.confidence || 0) * 100);
+                let confidenceColor = confidencePercent >= 90 ? '#10b981' : confidencePercent >= 70 ? '#f59e0b' : '#ef4444';
+                
+                let sourceIcon = '📝', sourceText = 'текст';
+                if (pred.source === 'image') { sourceIcon = '📷'; sourceText = 'фото'; }
+                else if (pred.source === 'fused') { sourceIcon = '🔀'; sourceText = 'текст+фото'; }
+                
+                item.innerHTML = `
+                    <div class="prediction-header">
+                        <div class="category">${pred.category || 'Неизвестно'}</div>
+                        <div class="confidence" style="background: ${confidenceColor}">${confidencePercent}%</div>
+                    </div>
+                    <div class="prediction-details">
+                        <strong>Найдено:</strong> "${pred.object_id || 'неизвестно'}"<br>
+                        ${pred.subcategory ? `<strong>Подкатегория:</strong> ${pred.subcategory}<br>` : ''}
+                        <strong>Источник:</strong> <span class="badge">${sourceIcon} ${sourceText}</span>
+                        ${pred.photo_ids?.length > 0 ? `<br><strong>Фото:</strong> ${pred.photo_ids.length} шт.` : ''}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            if (data.post_metadata) {
+                const metaDiv = document.createElement('div');
+                metaDiv.style.cssText = 'margin-top: 20px; padding: 20px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #667eea;';
+                
+                const inputText = document.getElementById('text')?.value.trim() || '';
+                const originalText = data.post_metadata.original_text || '';
+                const textMatches = inputText && originalText && inputText === originalText;
+                
+                metaDiv.innerHTML = `
+                    <h3 style="margin-bottom: 10px; color: #667eea;">📊 Информация из базы данных</h3>
+                    <p><strong>ID поста:</strong> ${data.post_metadata.id}</p>
+                    <p><strong>Категория в базе:</strong> ${data.post_metadata.category_in_db}</p>
+                    <p><strong>Фотографий:</strong> ${data.post_metadata.photos_count} шт.</p>
+                    
+                    ${originalText ? `
+                    <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                        <strong style="color: #667eea;">📝 Оригинальный текст объявления:</strong>
+                        <p style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-style: italic; color: #555; white-space: pre-wrap;">
+                            ${originalText}
+                        </p>
+                        ${inputText ? `
+                            <p style="margin-top: 10px; font-size: 0.9em; color: ${textMatches ? '#10b981' : '#f59e0b'};">
+                                ${textMatches ? '✅' : '⚠️'} Введённый текст ${textMatches ? 'полностью совпадает' : 'отличается'} от оригинала
+                            </p>
+                        ` : ''}
+                    </div>
+                    ` : ''}
+                    
+                    ${data.predictions[0]?.category ? `
+                        <p style="margin-top: 10px; padding: 10px; background: ${data.predictions[0].category === data.post_metadata.category_in_db ? '#d1fae5' : '#fef3c7'}; border-radius: 4px;">
+                            <strong>✅ Статус:</strong> 
+                            ${data.predictions[0].category === data.post_metadata.category_in_db ? 
+                                'Предсказание совпадает с категорией в базе!' : 
+                                `Предсказание (${data.predictions[0].category}) отличается от базы (${data.post_metadata.category_in_db})`}
+                        </p>
+                    ` : ''}
+                `;
+                container.appendChild(metaDiv);
+            }
+            
+            document.getElementById('results').classList.add('show');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            getToken();
+        });
+    </script>
+</body>
+</html>
