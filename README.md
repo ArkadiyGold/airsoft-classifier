@@ -23,31 +23,19 @@ API для автоматической классификации страйк�
 
 ## Архитектура
 
-┌─────────────────────────────────────┐
-│ Frontend (HTML/CSS/JS)              │
-│ Красивый веб-интерфейс              │
-└────────────┬────────────────────────┘
-│ HTTP/JSON
-▼
-┌─────────────────────────────────────┐
-│ FastAPI Backend                     │
-│ ┌──────────────────────────────┐    │
-│ │ JWT Authentication           │    │
-│ └──────────────────────────────┘    │
-│ ┌──────────┐ ┌──────────────┐       │
-│ │ Text     │ │ Image        │       │
-│ │ Model    │ │ Model        │       │
-│ │(sklearn) │ │ (ResNet50)   │       │
-│ └──────────┘ └──────────────┘       │
-└─────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────┐
-│ Data Sources                        │
-│ • posts.parquet (66,370 записей)    │
-│ • photos.parquet (95,100 записей)   │
-│ • subcategory_images/               │
-└─────────────────────────────────────┘
+Frontend (HTML/CSS/JS)
+|
+v
+FastAPI Backend
+- JWT Authentication
+- Text Model (sklearn)
+- Image Model (ResNet50)
+|
+v
+Data Sources
+- posts.parquet (66,370 записей)
+- photos.parquet (95,100 записей)
+- subcategory_images/
 
 ## Установка
 
