@@ -91,7 +91,7 @@ python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ### Публичный доступ (Cloudflare Tunnel)
 
 ```bash
-cloudflared tunnel --url http://localhost:8000
+.\cloudflared.exe tunnel --url http://localhost:8000
 ```
 
 Публичный URL: [Добавить ссылку](https://YOUR-CLOUDFLARE-URL.trycloudflare.com)
