@@ -256,6 +256,6 @@ airsoft_project/
 ## Автор
 
 **Аркадий Ванишев**  
-Студент Dk
-Email: [твой@email.com]  
+Студент Колледжа информационных и креативных технологий Ввгу IThub Владивосток
+Email: [vanisevarkadij@email.com]  
 GitHub: [@ArkadiyGold](https://github.com/ArkadiyGold)
